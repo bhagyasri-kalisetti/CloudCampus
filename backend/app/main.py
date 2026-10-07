@@ -1,4 +1,7 @@
+from app.routers.auth import router as auth_router
 from fastapi import FastAPI
+
+from app.routers.users import router as users_router
 
 app = FastAPI(
     title="CloudCampus API",
@@ -20,3 +23,7 @@ def health_check():
     return {
         "status": "healthy"
     }
+
+
+app.include_router(users_router, prefix="/api")
+app.include_router(auth_router, prefix="/api")
