@@ -5,6 +5,8 @@ from app.database import get_db
 from app.models.user import User
 from app.schemas.auth import LoginRequest, LoginResponse
 from app.security import verify_password
+from app.jwt import create_access_token
+
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -22,8 +24,14 @@ def login(
             detail="Invalid email or password"
         )
 
+    access_token = create_access_token({
+        "user_id": user.id
+    })
+
     return {
         "message": "Login successful",
+        "access_token": access_token,
+        "token_type": "bearer",
         "user_id": user.id,
         "name": user.name,
         "email": user.email
