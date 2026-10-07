@@ -30,3 +30,6 @@ def get_db():
         yield db
     finally:
         db.close()
+from app.models.user import User
+
+Base.metadata.create_all(bind=engine)
