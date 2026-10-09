@@ -5,24 +5,14 @@ from app.database import get_db
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse
 from app.security import hash_password
-
-router = APIRouter(prefix="/users", tags=["Users"])
-
-
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-
-from app.database import get_db
-from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse
-from app.security import hash_password
 from app.dependencies import get_current_user
 
-
 router = APIRouter(prefix="/users", tags=["Users"])
+
+
 @router.get("/me", response_model=UserResponse)
 def get_my_profile(
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     return current_user
 
@@ -30,7 +20,7 @@ def get_my_profile(
 @router.get("/", response_model=list[UserResponse])
 def get_users(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     return db.query(User).all()
 
@@ -38,26 +28,28 @@ def get_users(
 @router.post("/", response_model=UserResponse)
 def create_user(
     user_data: UserCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
-    existing_user = db.query(User).filter(
-        User.email == user_data.email
-    ).first()
+    existing_user = (
+        db.query(User)
+        .filter(User.email == user_data.email)
+        .first()
+    )
 
     if existing_user:
         raise HTTPException(
             status_code=400,
-            detail="Email already registered"
+            detail="Email already registered",
         )
 
     user = User(
         name=user_data.name,
         email=user_data.email,
-        password=hash_password(user_data.password)
+        password=hash_password(user_data.password),
     )
 
     db.add(user)
     db.commit()
     db.refresh(user)
 
-    return users
+    return user
